@@ -9,13 +9,19 @@ from torch import optim
 import time
 import os
 import pandas as pd
+from info_nce import InfoNCE
+#import warnings
+#warnings.simplefilter("ignore", UserWarning)
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 
 CE = torch.nn.CrossEntropyLoss()
+INCE = InfoNCE() # Contrastive Predictive Coding; van den Oord, et al. 2018
 
-def contrastive_loss(v1, v2):
+def contrastive_loss(v1, v2, beta=0.8):
   logits = torch.matmul(v1,torch.transpose(v2, 0, 1))
   labels = torch.arange(logits.shape[0], device=v1.device)
-  return CE(logits, labels) + CE(torch.transpose(logits, 0, 1), labels)
+  return beta * (CE(logits, labels) + CE(torch.transpose(logits, 0, 1), labels)) + (1-beta) * (INCE(v1,v2)+INCE(v2,v1))
 
 model_name = 'distilbert-base-uncased'
 
@@ -27,19 +33,25 @@ train_dataset = GraphTextDataset(root='./data/', gt=gt, split='train', tokenizer
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-nb_epochs = 5
-batch_size = 32
-learning_rate = 2e-5
+nb_epochs = 50
+batch_size = 16
+learning_rate = 2e-4
 
 val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=True)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
-model = Model(model_name=model_name, num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300) # nout = bert model hidden dim
+model = Model(model_name=model_name, num_node_features=300, nout=768, nhid=300, graph_hidden_channels=300,conv_type='GAT') # nout = bert model hidden dim
 model.to(device)
 
+parameter_string = 'model_name: {}, num_node_features: {}, nout: {}, nhid: {}, graph_hidden_channels: {}, conv_type: {}, nheads: {}'.format(model_name, 300, 768, 500, 500, "GAT", 10)
+print(parameter_string)
+print(batch_size)
+print(learning_rate)
 optimizer = optim.AdamW(model.parameters(), lr=learning_rate,
                                 betas=(0.9, 0.999),
                                 weight_decay=0.01)
+lr_scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=5, verbose=True)
+
 
 epoch = 0
 loss = 0
@@ -88,11 +100,13 @@ for i in range(nb_epochs):
                                 attention_mask.to(device))
         current_loss = contrastive_loss(x_graph, x_text)   
         val_loss += current_loss.item()
+    lr_scheduler.step(val_loss)
+    
     best_validation_loss = min(best_validation_loss, val_loss)
     print('-----EPOCH'+str(i+1)+'----- done.  Validation loss: ', str(val_loss/len(val_loader)) )
     if best_validation_loss==val_loss:
         print('validation loss improoved saving checkpoint...')
-        save_path = os.path.join('./', 'model'+str(i)+'.pt')
+        save_path = os.path.join('./models/', 'model'+str(i)+'.pt')
         torch.save({
         'epoch': i,
         'model_state_dict': model.state_dict(),
