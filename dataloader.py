@@ -1,3 +1,16 @@
+"""
+This script defines dataloaders for a graph-text classification task. 
+
+Modules:
+- GraphTextDataset: Dataset of graphs with text descriptions.
+- GraphDataset: Dataset of graphs without text descriptions.
+- TextDataset: Dataset of text inputs.
+
+Disclaimer:
+- This code is not ours, it was provided by the challenge organizers
+"""
+
+
 import os
 import os.path as osp
 import torch

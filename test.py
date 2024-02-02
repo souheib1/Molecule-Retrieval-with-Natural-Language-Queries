@@ -1,3 +1,7 @@
+"""
+Generate CSV file for the test data prediction using a pretrained model
+"""
+
 from dataloader import GraphTextDataset, GraphDataset, TextDataset
 from torch_geometric.data import DataLoader
 from torch.utils.data import DataLoader as TorchDataLoader
@@ -11,8 +15,7 @@ import os
 import pandas as pd
 from info_nce import InfoNCE
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-#import warnings
-#warnings.simplefilter("ignore", UserWarning)
+
 
 
 CE = torch.nn.CrossEntropyLoss()
