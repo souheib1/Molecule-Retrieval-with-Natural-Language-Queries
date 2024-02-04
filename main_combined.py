@@ -5,7 +5,7 @@ Pipeline Overview:
 1. Initialize necessary modules and variables.
 2. Data Loading: Load graph and text datasets for training, validation, and testing.
 3. Model Definition: Define the Graph-Text Fusion model architecture.
-4. Custom Loss Functions: Custom contrastive loss functions optimize joint learning of graph and text embeddings (InfoNCE and memory optimization).
+4. Custom Loss Functions: Custom contrastive loss functions optimize joint learning of graph and text embeddings.
 5. Optimizer and Scheduler Setup: Setup AdamW optimizer with separate learning rates and linear scheduler with warm-up steps
 6. Training Loop: Iterate over epochs and batches to train the model.
 7. Validation: Evaluate the model's performance on a validation set / Save the model if validation loss improves.

@@ -1,7 +1,7 @@
 """
 This script defines the Model we implemented for the problem combining a graph encoder and text encoder.
 The graph encoder consists of a GAT (Graph Attention Network) encoder: GatEncoder.
-The text encoder is based on BERT with modifications and includes an additional MLP layer.
+The text encoder is based on SciBERT with modifications and includes an additional MLP layer.
 
 Modules:
 - GatEncoder: GAT encoder with customizable architecture including layer normalization and pooling options.
@@ -69,21 +69,6 @@ class GatEncoder(nn.Module):
             for layer in self.layers:
                 x = layer(x, edge_index).relu()
         return x
-
-    def forward(self, graph_batch):
-        x = graph_batch.x
-        edge_index = graph_batch.edge_index
-        batch = graph_batch.batch
-        x = self.conv1(x, edge_index)
-        x = x.relu()
-        x = self.conv2(x, edge_index)
-        x = x.relu()
-        x = self.conv3(x, edge_index)
-        x = global_mean_pool(x, batch)
-        x = self.mol_hidden1(x).relu()
-        x = self.mol_hidden2(x)
-        x = self.ln(x)
-        return x
     
 
 class MLP(nn.Module):
@@ -103,7 +88,7 @@ class MLP(nn.Module):
 
 class TextEncoder(nn.Module):
     """
-    Modified version of the BERT-based text encoder with an additional MLP layer.    
+    Modified version of the SciBERT-based text encoder with an additional MLP layer.    
     """
     def __init__(self, model_name):
         super(TextEncoder, self).__init__()
