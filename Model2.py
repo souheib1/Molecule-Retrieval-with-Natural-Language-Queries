@@ -15,6 +15,7 @@ Note:
 - Refer to the original papers of the models here : 
     - https://arxiv.org/pdf/1710.10903.pdf
     - https://arxiv.org/pdf/1810.04805.pdf
+    - https://arxiv.org/abs/1903.10676.pdf
 """
 
 

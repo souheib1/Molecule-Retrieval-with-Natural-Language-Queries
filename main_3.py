@@ -30,49 +30,7 @@ import pandas as pd
 from info_nce import InfoNCE
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from sklearn.metrics.pairwise import cosine_similarity
-
-
-
-CE = torch.nn.CrossEntropyLoss()
-INCE = InfoNCE() # Contrastive Predictive Coding; van den Oord, et al. 2018
-def contrastive_loss(v1, v2, beta=0.1):
-    logits = torch.matmul(v1, torch.transpose(v2, 0, 1))
-    labels = torch.arange(logits.shape[0], device=v1.device)
-    return beta * (CE(logits, labels) + CE(torch.transpose(logits, 0, 1), labels)) + (1 - beta) * (INCE(v1, v2) + INCE(v2, v1))
-
-class customContrastiveLoss(torch.nn.Module):
-    """ Contrastive loss function.
-    The main difference between this and the standard contrastive loss is that this one uses the InfoNCE loss instead of the cross entropy loss. 
-    We also keep in memory last seen batch of text and graph embeddings to compute the loss.
-    """
-    def __init__(self, beta=0.1, memory = 5):
-        super(customContrastiveLoss, self).__init__()
-        self.beta = beta
-        self.ce = torch.nn.CrossEntropyLoss()
-        self.ince = InfoNCE()
-        self.memory = memory
-        if self.memory > 0:
-            self.memory_text = None
-            self.memory_graph = None
-    def reset_memeory(self):
-        self.memory_text = None
-        self.memory_graph = None
-    def forward(self, v1, v2):
-        logits = torch.matmul(v1, torch.transpose(v2, 0, 1))
-        labels = torch.arange(logits.shape[0], device=v1.device)
-        result = self.beta * (self.ce(logits, labels) + self.ce(torch.transpose(logits, 0, 1), labels)) + (1 - self.beta) * (self.ince(v1, v2, self.memory_graph) + self.ince(v2, v1, self.memory_text))
-        if self.memory > 0:
-            with torch.no_grad():
-                if self.memory_text is None:
-                    self.memory_text = v1.detach()
-                    self.memory_graph = v2.detach()
-                else:
-                    self.memory_text = torch.cat((self.memory_text, v1), 0)
-                    self.memory_graph = torch.cat((self.memory_graph, v2), 0)
-                    if self.memory_text.shape[0] > self.memory:
-                        self.memory_text = self.memory_text[-self.memory:]
-                        self.memory_graph = self.memory_graph[-self.memory:]
-        return result
+from loss import contrastive_loss,customContrastiveLoss
 
 
 save_directory = "./custom_loss"

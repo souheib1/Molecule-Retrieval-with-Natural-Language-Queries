@@ -29,16 +29,10 @@ import os
 import pandas as pd
 from info_nce import InfoNCE
 from torch.optim.lr_scheduler import ReduceLROnPlateau
-
+from loss import contrastive_loss
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-CE = torch.nn.CrossEntropyLoss()
-INCE = InfoNCE() # Contrastive Predictive Coding; van den Oord, et al. 2018
-def contrastive_loss(v1, v2, beta=0.1):
-    logits = torch.matmul(v1, torch.transpose(v2, 0, 1))
-    labels = torch.arange(logits.shape[0], device=v1.device)
-    return beta * (CE(logits, labels) + CE(torch.transpose(logits, 0, 1), labels)) + (1 - beta) * (INCE(v1, v2) + INCE(v2, v1))
 
 save_directory = "./batches2"
 if not os.path.exists(save_directory):
