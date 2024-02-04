@@ -6,7 +6,8 @@ Team: Baku incorporated
 
 In this challenge, given a textual query and a list of molecules (represented as graphs) without any textual reference information, the aim is to find the molecule corresponding to the query. Hence, we integrated different types of information: the structured knowledge represented by the text and the chemical properties present in the molecular graphs. The pipeline used to handle this task is built by jointly training a text encoder and a molecule encoder using contrastive learning. Through contrastive learning, the model learns to match similar text-molecule pairs in the learned representation space, while discarding dissimilar pairs.
 
-![Pipeline_V3](https://github.com/souheib1/Molecule-Retrieval-with-Natural-Language-Queries/assets/73786465/f81a73e0-4c84-40f0-84a9-aad7d82f8136)
+![final](https://github.com/souheib1/Molecule-Retrieval-with-Natural-Language-Queries/assets/73786465/c4d78446-63be-43a6-9d95-fcd2055aebee)
+
 
 The performance of your models will be assessed using the label ranking average precision score (https://scikit-learn.org/stable/modules/generated/sklearn.metrics.label_ranking_average_precision_score.html)
 
